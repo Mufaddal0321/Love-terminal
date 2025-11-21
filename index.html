@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Love Terminal for Amrutha</title>
+  <style>
+    body {
+      background: #000;
+      color: #00ff66;
+      font-family: Consolas, monospace;
+      padding: 0;
+      margin: 0;
+    }
+    #terminal {
+      padding: 20px;
+      height: 75vh;
+      overflow-y: auto;
+      border-bottom: 2px solid #00ff66;
+      white-space: pre-wrap;
+    }
+    #input-line {
+      display: flex;
+      padding: 10px;
+    }
+    #cmd {
+      flex: 1;
+      background: black;
+      border: none;
+      outline: none;
+      color: #00ff66;
+      font-size: 16px;
+    }
+    .fade-in {
+      animation: fadeIn 0.8s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* GAME */
+    #gameCanvas {
+      background: #111;
+      border: 2px solid #00ff66;
+      display: none;
+      margin: 20px auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="terminal"></div>
+
+  <div id="input-line">
+    <span>amrutha@love-terminal:~$&nbsp;</span>
+    <input id="cmd" autocomplete="off" />
+  </div>
+
+  <canvas id="gameCanvas" width="400" height="500"></canvas>
+
+  <script>
+    const terminal = document.getElementById("terminal");
+    const cmd = document.getElementById("cmd");
+    const gameCanvas = document.getElementById("gameCanvas");
+    const ctx = gameCanvas.getContext("2d");
+
+    const MEMORIES = [
+      "🌸 Our first date at Lal Bagh — the moment everything began.",
+      "🍽️ Lunch and sweet peaceful moments at CAJC — simple and perfect.",
+      "🎓 Graduation — celebrating achievements together.",
+      "🏫 Joining the same college — meant-to-be destiny."
+    ];
+
+    const FUTURE = [
+      "💍 A beautiful marriage together.",
+      "🏡 A peaceful home full of warmth.",
+      "👶 Sweet little kids running around.",
+      "✈️ Travels, adventures, and endless memories.",
+      "❤️ Growing old together — hand in hand."
+    ];
+
+    function write(msg) {
+      const p = document.createElement("div");
+      p.innerHTML = `<span class='fade-in'>${msg}</span>`;
+      terminal.appendChild(p);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    function clearTerminal() {
+      terminal.innerHTML = "";
+    }
+
+    function help() {
+      write("Available commands:
+
+help — list commands
+memories — show special moments
+future — show dreams together
+game — start heart-catching game
+howwasyourday — see a sweet message
+poem — get a romantic poem
+surprise — receive a random cute surprise
+song — get a love‑themed song line
+clear — clear terminal");
+    }
+
+    // HEART GAME
+    let hearts = [];
+    let score = 0;
+    let gameRunning = false;
+
+    function startGame() {
+      gameCanvas.style.display = "block";
+      clearTerminal();
+      write("❤️ CATCH THE HEARTS GAME — tap the falling hearts!");
+      write("Type 'stop' to end the game.");
+
+      hearts = [];
+      score = 0;
+      gameRunning = true;
+
+      spawnHeart();
+      updateGame();
+    }
+
+    function spawnHeart() {
+      if (!gameRunning) return;
+      hearts.push({ x: Math.random() * 360 + 20, y: -20 });
+      setTimeout(spawnHeart, 800);
+    }
+
+    gameCanvas.addEventListener("click", e => {
+      const rect = gameCanvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      hearts.forEach((h, i) => {
+        if (Math.abs(x - h.x) < 20 && Math.abs(y - h.y) < 20) {
+          hearts.splice(i, 1);
+          score++;
+          write(`💗 Caught! Score: ${score}`);
+        }
+      });
+    });
+
+    function updateGame() {
+      if (!gameRunning) return;
+
+      ctx.clearRect(0, 0, 400, 500);
+
+      ctx.fillStyle = "#ff4d88";
+      hearts.forEach(h => {
+        h.y += 2;
+        ctx.beginPath();
+        ctx.arc(h.x - 10, h.y, 10, 0, Math.PI * 2);
+        ctx.arc(h.x + 10, h.y, 10, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      requestAnimationFrame(updateGame);
+    }
+
+    function stopGame() {
+      gameRunning = false;
+      gameCanvas.style.display = "none";
+      write(`🎮 Game ended! Final Score: ${score}`);
+    }
+
+    // EXTRA COMMAND FUNCTIONS
+function howWasYourDay() {
+  write("My day was beautiful because I got to talk to you, Amrutha 💚");
+}
+
+function poem() {
+  write("🌹 *A Poem for You* 🌹");
+  write("In every beat my heart makes true,
+It whispers softly: I love you.");
+}
+
+function surprise() {
+  const msgs = [
+    "💘 You're the reason even ordinary days feel magical.",
+    "🌙 The moon looks jealous — you're stealing all the glow.",
+    "✨ If smiles were stars, yours would light up galaxies.",
+    "💞 You make reality better than dreams."
+  ];
+  write(msgs[Math.floor(Math.random() * msgs.length)]);
+}
+
+function song() {
+  write("🎶 *'I could hold you for a thousand years… and still feel like it's not enough.'* 🎶");
+}
+
+// COMMAND HANDLER
+    cmd.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        const input = cmd.value.trim();
+        write(`amrutha@love-terminal:~$ ${input}`);
+        cmd.value = "";
+
+        if (input === "help") help();
+        else if (input === "memories") MEMORIES.forEach(m => write(m));
+        else if (input === "future") FUTURE.forEach(f => write(f));
+        else if (input === "game") startGame();
+        else if (input === "stop") stopGame();
+        else if (input === "clear") clearTerminal();
+        else if (input === "howwasyourday") howWasYourDay();
+        else if (input === "poem") poem();
+        else if (input === "surprise") surprise();
+        else if (input === "song") song();
+        else write("Command not found. Type 'help'.");
+      }
+    });
+
+    // INTRO
+    write("💚 Love Terminal — crafted for Amrutha.");
+    write("Type 'help' to begin.");
+  </script>
+</body>
+</html>
